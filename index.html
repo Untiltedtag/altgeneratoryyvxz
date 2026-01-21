@@ -57,7 +57,7 @@
     <p class="text-sm text-textMuted mt-10">Free → 5 min cooldown • Premium → 1 min cooldown</p>
   </div>
 
-  <!-- Dashboard (hidden until logged in) -->
+  <!-- Dashboard -->
   <div id="dashboard" class="hidden flex min-h-screen overflow-hidden">
 
     <!-- Sidebar -->
@@ -121,7 +121,6 @@
         <p class="text-textMuted mb-8">Generate unlimited Roblox accounts instantly</p>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <!-- Account Types -->
           <div class="lg:col-span-1 space-y-6">
             <div class="bg-cardDark rounded-xl p-5 border border-gray-800">
               <div class="flex gap-3 mb-4">
@@ -174,7 +173,6 @@
             </button>
           </div>
 
-          <!-- Placeholder / Result -->
           <div class="lg:col-span-2 bg-placeholder rounded-2xl border border-gray-800 flex flex-col items-center justify-center min-h-[520px] text-center p-10 transition-all duration-500">
             <div id="placeholder-content" class="space-y-6">
               <div class="relative w-40 h-40 mx-auto">
@@ -206,7 +204,6 @@
           </div>
         </div>
 
-        <!-- Recent Generated -->
         <div class="mt-12">
           <h3 class="text-2xl font-bold mb-4">Recently Generated</h3>
           <div class="bg-cardDark rounded-xl overflow-hidden border border-gray-800">
@@ -261,12 +258,12 @@
 
   <script>
     // ────────────────────────────────────────────────
-    // Discord Login + Role-based Cooldown
+    // Discord Login + Role-based Cooldown - FIXED VERSION
     // ────────────────────────────────────────────────
     const CLIENT_ID = "1463609421619007674";
     const REDIRECT_URI = encodeURIComponent(window.location.origin + window.location.pathname);
 
-    let cooldownSeconds = 300; // default = Free (5 min)
+    let cooldownSeconds = 300;
 
     document.getElementById('discord-login-btn').onclick = () => {
       window.location = `https://discord.com/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=token&scope=identify%20guilds`;
@@ -278,47 +275,68 @@
     }
 
     window.addEventListener('load', async () => {
-      const hash = window.location.hash.substring(1);
-      if (hash) {
-        const params = new URLSearchParams(hash);
-        const token = params.get('access_token');
+      console.log("Page loaded - checking auth status...");
+
+      // Get token from URL hash (Discord redirect) or localStorage
+      let token = null;
+      if (window.location.hash) {
+        console.log("Hash detected:", window.location.hash);
+        const params = new URLSearchParams(window.location.hash.substring(1));
+        token = params.get('access_token');
         if (token) {
+          console.log("Token from hash:", token.substring(0, 10) + "...");
           localStorage.setItem('discord_token', token);
-          history.replaceState(null, null, window.location.pathname);
+          window.history.replaceState({}, document.title, window.location.pathname);
         }
       }
 
-      const token = localStorage.getItem('discord_token');
-      if (!token) return;
+      if (!token) {
+        token = localStorage.getItem('discord_token');
+        if (token) console.log("Token from storage:", token.substring(0, 10) + "...");
+      }
+
+      if (!token) {
+        console.log("No token - staying on login screen");
+        return;
+      }
+
+      console.log("Token present - fetching user...");
 
       try {
+        // Fetch user
         const userRes = await fetch('https://discord.com/api/users/@me', {
           headers: { Authorization: `Bearer ${token}` }
         });
-        if (!userRes.ok) throw new Error();
+        if (!userRes.ok) throw new Error(`User API: ${userRes.status}`);
         const user = await userRes.json();
-        document.getElementById('username-display').textContent = user.username;
+        document.getElementById('username-display').textContent = user.username || user.global_name || "User";
+        console.log("User:", user.username);
 
-        // Real role check
+        // Fetch member (role check)
         const memberRes = await fetch(`https://discord.com/api/guilds/1463607459946954794/members/${user.id}`, {
           headers: { Authorization: `Bot MTQ2MzYwOTQyMTYxOTAwNzY3NA.G8i4WQ.gRYWistbBI8xnLJo34kqg3Y4SyAicsmJUU8Rz0` }
         });
+        if (!memberRes.ok) throw new Error(`Member API: ${memberRes.status}`);
         const member = await memberRes.json();
-        const hasPremium = member.roles.some(roleId => roleId === '1463612380318535785');
+        const hasPremium = member.roles.includes('1463612380318535785');
         cooldownSeconds = hasPremium ? 60 : 300;
         document.getElementById('tier-display').textContent = hasPremium ? "Premium" : "Free";
         document.getElementById('tier-display').classList.add(hasPremium ? 'text-successGreen' : 'text-yellow-400');
+        console.log("Premium status:", hasPremium);
 
+        // Show dashboard, hide login
         document.getElementById('login-screen').classList.add('hidden');
         document.getElementById('dashboard').classList.remove('hidden');
-      } catch (e) {
-        console.error("Login / role check failed:", e);
+        console.log("Dashboard activated");
+      } catch (err) {
+        console.error("Auth failed:", err.message);
         localStorage.removeItem('discord_token');
+        alert("Login failed - check console (F12) or try again.");
       }
     });
 
     // ────────────────────────────────────────────────
-    // Generation + Cooldown Logic
+    // Generation + Cooldown
     // ────────────────────────────────────────────────
     function randomUsername() {
       const pre = ["Xx", "Nova", "Bloxy", "Shadow", "Cyber", "Phantom", "Glitch", "Neon"];
