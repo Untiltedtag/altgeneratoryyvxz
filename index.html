@@ -261,7 +261,7 @@
 
   <script>
     // ────────────────────────────────────────────────
-    // Discord Login + Role-based Cooldown (fully filled with your IDs)
+    // Discord Login + Role-based Cooldown
     // ────────────────────────────────────────────────
     const CLIENT_ID = "1463609421619007674";
     const REDIRECT_URI = encodeURIComponent(window.location.origin + window.location.pathname);
@@ -278,7 +278,6 @@
     }
 
     window.addEventListener('load', async () => {
-      // Handle OAuth callback
       const hash = window.location.hash.substring(1);
       if (hash) {
         const params = new URLSearchParams(hash);
@@ -300,7 +299,7 @@
         const user = await userRes.json();
         document.getElementById('username-display').textContent = user.username;
 
-        // ────────────── Real role check with YOUR server ID & role ID ──────────────
+        // Real role check
         const memberRes = await fetch(`https://discord.com/api/guilds/1463607459946954794/members/${user.id}`, {
           headers: { Authorization: `Bot MTQ2MzYwOTQyMTYxOTAwNzY3NA.G8i4WQ.gRYWistbBI8xnLJo34kqg3Y4SyAicsmJUU8Rz0` }
         });
