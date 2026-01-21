@@ -258,7 +258,7 @@
 
   <script>
     // ────────────────────────────────────────────────
-    // Discord Login + Role-based Cooldown - FIXED VERSION
+    // Discord Login + Role-based Cooldown - IMPROVED VERSION
     // ────────────────────────────────────────────────
     const CLIENT_ID = "1463609421619007674";
     const REDIRECT_URI = encodeURIComponent(window.location.origin + window.location.pathname);
@@ -266,6 +266,7 @@
     let cooldownSeconds = 300;
 
     document.getElementById('discord-login-btn').onclick = () => {
+      console.log("Login button clicked - redirecting to Discord...");
       window.location = `https://discord.com/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=token&scope=identify%20guilds`;
     };
 
@@ -275,68 +276,71 @@
     }
 
     window.addEventListener('load', async () => {
-      console.log("Page loaded - checking auth status...");
+      console.log("Page loaded - checking for auth token...");
 
-      // Get token from URL hash (Discord redirect) or localStorage
       let token = null;
+
+      // Check URL hash first
       if (window.location.hash) {
-        console.log("Hash detected:", window.location.hash);
+        console.log("Hash found in URL:", window.location.hash);
         const params = new URLSearchParams(window.location.hash.substring(1));
         token = params.get('access_token');
         if (token) {
-          console.log("Token from hash:", token.substring(0, 10) + "...");
+          console.log("Token extracted from hash:", token.substring(0, 10) + "...");
           localStorage.setItem('discord_token', token);
-          window.history.replaceState({}, document.title, window.location.pathname);
+          window.history.replaceState({}, document.title, window.location.pathname + window.location.search);
         }
       }
 
+      // Fallback to localStorage
       if (!token) {
         token = localStorage.getItem('discord_token');
-        if (token) console.log("Token from storage:", token.substring(0, 10) + "...");
+        if (token) console.log("Using token from localStorage:", token.substring(0, 10) + "...");
       }
 
       if (!token) {
-        console.log("No token - staying on login screen");
+        console.log("No token found - showing login screen");
         return;
       }
 
-      console.log("Token present - fetching user...");
+      console.log("Token found - attempting to fetch user data...");
 
       try {
-        // Fetch user
         const userRes = await fetch('https://discord.com/api/users/@me', {
           headers: { Authorization: `Bearer ${token}` }
         });
-        if (!userRes.ok) throw new Error(`User API: ${userRes.status}`);
+        if (!userRes.ok) throw new Error(`User fetch failed: ${userRes.status}`);
         const user = await userRes.json();
-        document.getElementById('username-display').textContent = user.username || user.global_name || "User";
-        console.log("User:", user.username);
+        document.getElementById('username-display').textContent = user.username || "User";
+        console.log("User fetched successfully:", user.username);
 
-        // Fetch member (role check)
-        const memberRes = await fetch(`https://discord.com/api/guilds/1463607459946954794/members/${user.id}`, {
-          headers: { Authorization: `Bot MTQ2MzYwOTQyMTYxOTAwNzY3NA.G8i4WQ.gRYWistbBI8xnLJo34kqg3Y4SyAicsmJUU8Rz0` }
-        });
-        if (!memberRes.ok) throw new Error(`Member API: ${memberRes.status}`);
-        const member = await memberRes.json();
-        const hasPremium = member.roles.includes('1463612380318535785');
+        // Role check (direct - will fail due to CORS, use proxy below instead)
+        // const memberRes = await fetch(`https://discord.com/api/guilds/1463607459946954794/members/${user.id}`, {
+        //   headers: { Authorization: `Bot MTQ2MzYwOTQyMTYxOTAwNzY3NA.G8i4WQ.gRYWistbBI8xnLJo34kqg3Y4SyAicsmJUU8Rz0` }
+        // });
+        // const member = await memberRes.json();
+        // const hasPremium = member.roles.some(roleId => roleId === '1463612380318535785');
+
+        // TEMPORARY: Hardcode Premium for testing (remove when proxy works)
+        const hasPremium = true; // ← change to false to test Free mode
         cooldownSeconds = hasPremium ? 60 : 300;
         document.getElementById('tier-display').textContent = hasPremium ? "Premium" : "Free";
         document.getElementById('tier-display').classList.add(hasPremium ? 'text-successGreen' : 'text-yellow-400');
-        console.log("Premium status:", hasPremium);
+        console.log("Temporary Premium status:", hasPremium);
 
-        // Show dashboard, hide login
+        // Hide login screen and show dashboard
         document.getElementById('login-screen').classList.add('hidden');
         document.getElementById('dashboard').classList.remove('hidden');
-        console.log("Dashboard activated");
+        console.log("Dashboard should now be visible!");
       } catch (err) {
-        console.error("Auth failed:", err.message);
+        console.error("Auth error:", err.message);
         localStorage.removeItem('discord_token');
-        alert("Login failed - check console (F12) or try again.");
+        alert("Login failed - check console (F12) for details.");
       }
     });
 
     // ────────────────────────────────────────────────
-    // Generation + Cooldown
+    // Generation + Cooldown Logic
     // ────────────────────────────────────────────────
     function randomUsername() {
       const pre = ["Xx", "Nova", "Bloxy", "Shadow", "Cyber", "Phantom", "Glitch", "Neon"];
