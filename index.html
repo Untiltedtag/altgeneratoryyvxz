@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AltGenator • Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            bgDark: '#0d0d17',
+            sidebar: '#11111f',
+            accentRed: '#ff2d55',
+            cardDark: '#1a1a2e',
+            neonPurple: '#a78bfa',
+            textMuted: '#a1a1aa',
+            successGreen: '#22c55e',
+            placeholder: '#2a2a40',
+            cooldownBg: '#2a1a2e',
+            discordBlue: '#5865F2',
+          },
+          animation: {
+            'spin-slow': 'spin 3s linear infinite',
+            'pulse-glow': 'pulseGlow 3s ease-in-out infinite alternate',
+            'dash': 'dash 1.5s ease-in-out forwards',
+            'fadeIn': 'fadeIn 0.7s ease-out',
+          },
+          keyframes: {
+            spin: { '0%': { transform: 'rotate(0deg)' }, '100%': { transform: 'rotate(360deg)' } },
+            pulseGlow: {
+              '0%': { boxShadow: '0 0 20px rgba(167,139,250,0.3)' },
+              '100%': { boxShadow: '0 0 45px rgba(167,139,250,0.7), 0 0 70px rgba(167,139,250,0.4)' }
+            },
+            dash: { 'to': { 'stroke-dashoffset': '0' } },
+            fadeIn: { '0%': { opacity: '0', transform: 'translateY(15px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-bgDark text-gray-100 min-h-screen font-sans antialiased">
+
+  <!-- Login Screen -->
+  <div id="login-screen" class="fixed inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-bgDark via-[#0f0c29] to-[#1a1a2e] z-50">
+    <i class="fa-solid fa-robot text-9xl text-neonPurple mb-10 animate-pulse-glow"></i>
+    <h1 class="text-6xl font-extrabold mb-4 bg-gradient-to-r from-neonPurple to-accentRed bg-clip-text text-transparent">AltGenator</h1>
+    <p class="text-2xl text-textMuted mb-12">Generate Roblox alts • Fast • Secure</p>
+    <button id="discord-login-btn" class="bg-discordBlue hover:bg-[#4752c4] text-white font-bold py-5 px-16 rounded-2xl text-2xl shadow-2xl transform hover:scale-105 transition-all flex items-center gap-5">
+      <i class="fa-brands fa-discord text-4xl"></i>
+      Login with Discord
+    </button>
+    <p class="text-sm text-textMuted mt-10">Free → 5 min cooldown • Premium → 1 min cooldown</p>
+  </div>
+
+  <!-- Dashboard (hidden until logged in) -->
+  <div id="dashboard" class="hidden flex min-h-screen overflow-hidden">
+
+    <!-- Sidebar -->
+    <aside class="w-64 bg-sidebar border-r border-gray-800 flex flex-col h-screen overflow-y-auto">
+      <div class="p-6 border-b border-gray-800">
+        <div class="flex items-center gap-3">
+          <i class="fa-solid fa-robot text-2xl text-neonPurple"></i>
+          <h1 class="text-2xl font-bold text-white">AltGenator</h1>
+        </div>
+      </div>
+
+      <nav class="flex-1 px-3 py-6">
+        <ul class="space-y-1">
+          <li><a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-gray-800"><i class="fa-solid fa-gauge"></i> DASHBOARD</a></li>
+          <li><a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg bg-accentRed text-white font-medium"><i class="fa-solid fa-bolt"></i> Generate</a></li>
+          <li><a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-gray-800"><i class="fa-solid fa-users"></i> Accounts</a></li>
+          <li><a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-gray-800"><i class="fa-solid fa-cookie"></i> Cookie Checker</a></li>
+          <li><a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-gray-800"><i class="fa-solid fa-magnifying-glass"></i> Scrape</a></li>
+
+          <div class="my-6 px-4 text-xs text-textMuted uppercase tracking-wider">RESOURCES</div>
+          <li><a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-gray-800"><i class="fa-solid fa-bell"></i> Updates</a></li>
+          <li><a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-gray-800"><i class="fa-solid fa-crown"></i> Upgrade</a></li>
+          <li><a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-gray-800"><i class="fa-solid fa-circle-question"></i> Support</a></li>
+          <li><a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-gray-800"><i class="fa-solid fa-handshake"></i> Affiliate Program</a></li>
+
+          <div class="my-6 px-4 text-xs text-textMuted uppercase tracking-wider">SOCIAL</div>
+          <li><a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-gray-800"><i class="fa-brands fa-discord"></i> Discord</a></li>
+          <li><a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-gray-800"><i class="fa-brands fa-telegram"></i> Telegram</a></li>
+        </ul>
+      </nav>
+
+      <div class="p-4 border-t border-gray-800">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-full bg-gradient-to-br from-purple-600 to-pink-500 flex items-center justify-center text-white font-bold">Y</div>
+          <div>
+            <p class="font-medium" id="username-display">yyvxz</p>
+            <p class="text-xs flex items-center gap-1"><i class="fa-solid fa-crown text-yellow-400"></i> <span id="tier-display">Free</span></p>
+          </div>
+        </div>
+        <div class="mt-4 flex gap-2">
+          <button class="flex-1 bg-gray-800 hover:bg-gray-700 py-2 rounded text-sm"><i class="fa-solid fa-gear"></i> Settings</button>
+          <button onclick="logout()" class="flex-1 bg-red-600/30 hover:bg-red-600/50 py-2 rounded text-sm"><i class="fa-solid fa-right-from-bracket"></i> Sign Out</button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 overflow-y-auto">
+      <div class="bg-gray-900/80 backdrop-blur-md border-b border-gray-800 p-4 flex flex-wrap gap-6 justify-center md:justify-start">
+        <div class="text-center"><i class="fa-solid fa-fire text-red-500"></i> <p class="text-sm text-textMuted">Streak</p><p class="text-xl font-bold">0</p></div>
+        <div class="text-center"><i class="fa-solid fa-calendar-day text-blue-400"></i> <p class="text-sm text-textMuted">Today</p><p class="text-xl font-bold">0</p></div>
+        <div class="text-center"><i class="fa-solid fa-calendar-week text-purple-400"></i> <p class="text-sm text-textMuted">Week</p><p class="text-xl font-bold">1</p></div>
+        <div class="text-center"><i class="fa-solid fa-calendar-month text-green-400"></i> <p class="text-sm text-textMuted">Month</p><p class="text-xl font-bold">4</p></div>
+        <div class="text-center"><i class="fa-solid fa-trophy text-yellow-400"></i> <p class="text-sm text-textMuted">Total</p><p class="text-xl font-bold">123</p></div>
+        <div class="text-center"><i class="fa-solid fa-dollar-sign text-emerald-400"></i> <p class="text-sm text-textMuted">Avg RAP</p><p class="text-xl font-bold">0</p></div>
+        <button class="ml-auto bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded text-sm flex items-center gap-2"><i class="fa-solid fa-rotate"></i> Reset Cooldowns</button>
+      </div>
+
+      <div class="p-6">
+        <h2 class="text-3xl font-bold mb-2">Account Generator</h2>
+        <p class="text-textMuted mb-8">Generate unlimited Roblox accounts instantly</p>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <!-- Account Types -->
+          <div class="lg:col-span-1 space-y-6">
+            <div class="bg-cardDark rounded-xl p-5 border border-gray-800">
+              <div class="flex gap-3 mb-4">
+                <button class="flex-1 bg-accentRed text-white py-2 rounded font-medium">Standard</button>
+                <button class="flex-1 bg-gray-800 hover:bg-gray-700 py-2 rounded">Bulk</button>
+              </div>
+
+              <div class="space-y-4 max-h-96 overflow-y-auto pr-2">
+                <div class="bg-gray-900/50 p-4 rounded-lg border border-gray-700 hover:border-neonPurple transition-colors cursor-pointer">
+                  <div class="flex justify-between items-start">
+                    <div>
+                      <h4 class="font-semibold">Alt</h4>
+                      <p class="text-sm text-textMuted">Generate Roblox alt account</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                      <span class="text-xs bg-green-600/30 text-green-400 px-2 py-1 rounded">Pre-checked</span>
+                      <span id="cooldown-badge" class="hidden text-xs bg-cooldownBg text-neonPurple px-2 py-1 rounded-full font-medium">ⓘ <span id="cooldown-time">60s</span></span>
+                    </div>
+                  </div>
+                  <p class="text-xs text-textMuted mt-2">○ 1m cooldown</p>
+                </div>
+
+                <div class="bg-gray-900/50 p-4 rounded-lg border border-gray-700 hover:border-neonPurple transition-colors cursor-pointer">
+                  <div class="flex justify-between items-start">
+                    <div>
+                      <h4 class="font-semibold">Alt (30+ day)</h4>
+                      <p class="text-sm text-textMuted">Generate 30+ days old Roblox alt account</p>
+                    </div>
+                    <span class="text-xs bg-green-600/30 text-green-400 px-2 py-1 rounded">Pre-checked</span>
+                  </div>
+                  <p class="text-xs text-textMuted mt-2">○ 5m cooldown</p>
+                </div>
+
+                <div class="bg-gray-900/50 p-4 rounded-lg border border-gray-700 hover:border-neonPurple transition-colors cursor-pointer">
+                  <h4 class="font-semibold">Random</h4>
+                  <p class="text-sm text-textMuted">Generate random account that may have Robux or items</p>
+                  <p class="text-xs text-textMuted mt-2">○ 10m cooldown</p>
+                </div>
+
+                <div class="bg-gray-900/50 p-4 rounded-lg border border-gray-700 hover:border-neonPurple transition-colors cursor-pointer">
+                  <h4 class="font-semibold">2010 Unchecked</h4>
+                  <p class="text-sm text-textMuted">Generate unchecked Roblox account with 2010 join date</p>
+                  <p class="text-xs text-textMuted mt-2">○ 1m cooldown</p>
+                </div>
+              </div>
+            </div>
+
+            <button id="generate-btn" class="w-full bg-gradient-to-r from-accentRed to-pink-600 py-4 rounded-xl text-xl font-bold shadow-lg hover:shadow-red-600/50 transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100">
+              Generate Account
+            </button>
+          </div>
+
+          <!-- Placeholder / Result -->
+          <div class="lg:col-span-2 bg-placeholder rounded-2xl border border-gray-800 flex flex-col items-center justify-center min-h-[520px] text-center p-10 transition-all duration-500">
+            <div id="placeholder-content" class="space-y-6">
+              <div class="relative w-40 h-40 mx-auto">
+                <svg class="absolute inset-0 w-full h-full" viewBox="0 0 100 100">
+                  <circle cx="50" cy="50" r="45" fill="none" stroke="#333" stroke-width="6" />
+                  <circle cx="50" cy="50" r="45" fill="none" stroke="#444" stroke-width="6" stroke-dasharray="10 5" />
+                </svg>
+                <div class="absolute inset-0 flex items-center justify-center">
+                  <i class="fa-solid fa-user text-7xl text-gray-600 animate-pulse-glow"></i>
+                </div>
+              </div>
+              <h3 class="text-3xl font-bold text-white">No Account Generated</h3>
+              <p class="text-lg text-textMuted max-w-md mx-auto">
+                Select an account type and click "Generate Account" to create a new account.
+              </p>
+            </div>
+
+            <div id="generated-result" class="hidden space-y-8 w-full max-w-lg animate-fadeIn">
+              <div class="bg-gray-900/80 p-8 rounded-xl border border-neonPurple/40 shadow-lg">
+                <p class="text-xl mb-4"><strong class="text-neonPurple">Username:</strong><br>
+                  <span id="gen-username" class="font-mono text-2xl text-white break-all"></span>
+                </p>
+                <p class="text-xl"><strong class="text-neonPurple">Password:</strong><br>
+                  <span id="gen-password" class="font-mono text-2xl text-white break-all"></span>
+                </p>
+              </div>
+              <p class="text-sm text-textMuted">Credentials copied to clipboard! (simulation only)</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Generated -->
+        <div class="mt-12">
+          <h3 class="text-2xl font-bold mb-4">Recently Generated</h3>
+          <div class="bg-cardDark rounded-xl overflow-hidden border border-gray-800">
+            <div class="p-4 text-textMuted">Your 5 most recently generated accounts (local only)</div>
+            <div id="recent-accounts" class="divide-y divide-gray-800"></div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Loading Modal -->
+  <div id="loading-modal" class="fixed inset-0 bg-black/95 backdrop-blur-sm flex items-center justify-center z-50 hidden">
+    <div class="text-center max-w-md w-full px-6">
+      <div class="relative mx-auto mb-10 w-32 h-32">
+        <svg class="absolute inset-0 w-full h-full" viewBox="0 0 100 100">
+          <circle cx="50" cy="50" r="45" fill="none" stroke="#222" stroke-width="10" />
+          <circle id="progress-circle" cx="50" cy="50" r="45" fill="none" stroke="#ff2d55" stroke-width="10" stroke-linecap="round" stroke-dasharray="283" stroke-dashoffset="283" />
+        </svg>
+        <div class="absolute inset-0 flex items-center justify-center">
+          <i class="fa-solid fa-user text-5xl text-accentRed animate-pulse-glow"></i>
+        </div>
+      </div>
+
+      <h3 class="text-3xl font-bold mb-2 text-white">Generating Alt</h3>
+      <p class="text-textMuted mb-10">Please wait while we create your account...</p>
+
+      <ul id="loading-steps" class="space-y-5 text-left">
+        <li class="flex items-center gap-4 text-lg opacity-50 transition-all duration-400" data-step="1">
+          <i class="fa-solid fa-circle-notch fa-spin text-accentRed text-2xl min-w-[32px]"></i>
+          Connecting to server...
+        </li>
+        <li class="flex items-center gap-4 text-lg opacity-50 transition-all duration-400" data-step="2">
+          <i class="fa-solid fa-circle-notch fa-spin text-accentRed text-2xl min-w-[32px]"></i>
+          Generating username...
+        </li>
+        <li class="flex items-center gap-4 text-lg opacity-50 transition-all duration-400" data-step="3">
+          <i class="fa-solid fa-circle-notch fa-spin text-accentRed text-2xl min-w-[32px]"></i>
+          Creating password...
+        </li>
+        <li class="flex items-center gap-4 text-lg opacity-50 transition-all duration-400" data-step="4">
+          <i class="fa-solid fa-circle-notch fa-spin text-accentRed text-2xl min-w-[32px]"></i>
+          Verifying account...
+        </li>
+        <li class="flex items-center gap-4 text-lg opacity-50 transition-all duration-400" data-step="5">
+          <i class="fa-solid fa-circle-notch fa-spin text-accentRed text-2xl min-w-[32px]"></i>
+          Finalizing account...
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <script>
+    // ────────────────────────────────────────────────
+    // Discord Login + Role-based Cooldown (fully filled with your IDs)
+    // ────────────────────────────────────────────────
+    const CLIENT_ID = "1463609421619007674";
+    const REDIRECT_URI = encodeURIComponent(window.location.origin + window.location.pathname);
+
+    let cooldownSeconds = 300; // default = Free (5 min)
+
+    document.getElementById('discord-login-btn').onclick = () => {
+      window.location = `https://discord.com/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=token&scope=identify%20guilds`;
+    };
+
+    function logout() {
+      localStorage.removeItem('discord_token');
+      location.reload();
+    }
+
+    window.addEventListener('load', async () => {
+      // Handle OAuth callback
+      const hash = window.location.hash.substring(1);
+      if (hash) {
+        const params = new URLSearchParams(hash);
+        const token = params.get('access_token');
+        if (token) {
+          localStorage.setItem('discord_token', token);
+          history.replaceState(null, null, window.location.pathname);
+        }
+      }
+
+      const token = localStorage.getItem('discord_token');
+      if (!token) return;
+
+      try {
+        const userRes = await fetch('https://discord.com/api/users/@me', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (!userRes.ok) throw new Error();
+        const user = await userRes.json();
+        document.getElementById('username-display').textContent = user.username;
+
+        // ────────────── Real role check with YOUR server ID & role ID ──────────────
+        const memberRes = await fetch(`https://discord.com/api/guilds/1463607459946954794/members/${user.id}`, {
+          headers: { Authorization: `Bot MTQ2MzYwOTQyMTYxOTAwNzY3NA.G8i4WQ.gRYWistbBI8xnLJo34kqg3Y4SyAicsmJUU8Rz0` }
+        });
+        const member = await memberRes.json();
+        const hasPremium = member.roles.some(roleId => roleId === '1463612380318535785');
+        cooldownSeconds = hasPremium ? 60 : 300;
+        document.getElementById('tier-display').textContent = hasPremium ? "Premium" : "Free";
+        document.getElementById('tier-display').classList.add(hasPremium ? 'text-successGreen' : 'text-yellow-400');
+
+        document.getElementById('login-screen').classList.add('hidden');
+        document.getElementById('dashboard').classList.remove('hidden');
+      } catch (e) {
+        console.error("Login / role check failed:", e);
+        localStorage.removeItem('discord_token');
+      }
+    });
+
+    // ────────────────────────────────────────────────
+    // Generation + Cooldown Logic
+    // ────────────────────────────────────────────────
+    function randomUsername() {
+      const pre = ["Xx", "Nova", "Bloxy", "Shadow", "Cyber", "Phantom", "Glitch", "Neon"];
+      const suf = ["Hyper", "Wolf", "King", "Noob", "YT", "Pro", "xX", "Vortex"];
+      return pre[Math.floor(Math.random()*pre.length)] + suf[Math.floor(Math.random()*suf.length)] + Math.floor(Math.random()*9999) + Math.random().toString(36).slice(7,11);
+    }
+
+    function randomPassword() {
+      return Math.random().toString(36).slice(2,17) + "!" + Math.floor(Math.random()*100);
+    }
+
+    const generateBtn = document.getElementById('generate-btn');
+    const cooldownBadge = document.getElementById('cooldown-badge');
+    const cooldownTimeEl = document.getElementById('cooldown-time');
+    const loadingModal = document.getElementById('loading-modal');
+    const steps = document.querySelectorAll('#loading-steps li');
+    const placeholderContent = document.getElementById('placeholder-content');
+    const generatedResult = document.getElementById('generated-result');
+    const genUsernameEl = document.getElementById('gen-username');
+    const genPasswordEl = document.getElementById('gen-password');
+    const recentAccountsEl = document.getElementById('recent-accounts');
+
+    let accounts = JSON.parse(localStorage.getItem('fakeAccounts') || '[]');
+    let cooldownEndTime = parseInt(localStorage.getItem('cooldownEnd') || '0');
+
+    function formatTime(seconds) {
+      if (seconds <= 0) return "0s";
+      const m = Math.floor(seconds / 60);
+      const s = seconds % 60;
+      return m > 0 ? `${m}m ${s}s` : `${s}s`;
+    }
+
+    function updateCooldownDisplay() {
+      const now = Date.now();
+      const remaining = Math.max(0, Math.ceil((cooldownEndTime - now) / 1000));
+
+      if (remaining > 0) {
+        generateBtn.disabled = true;
+        cooldownBadge.classList.remove('hidden');
+        cooldownTimeEl.textContent = formatTime(remaining);
+      } else {
+        generateBtn.disabled = false;
+        cooldownBadge.classList.add('hidden');
+        generateBtn.textContent = "Generate Account";
+      }
+    }
+
+    function startCooldown() {
+      cooldownEndTime = Date.now() + cooldownSeconds * 1000;
+      localStorage.setItem('cooldownEnd', cooldownEndTime);
+      updateCooldownDisplay();
+    }
+
+    setInterval(updateCooldownDisplay, 1000);
+    updateCooldownDisplay();
+
+    function completeStep(index) {
+      if (index >= steps.length) return;
+      const step = steps[index];
+      step.classList.remove('opacity-50');
+      step.classList.add('text-successGreen', 'font-medium');
+      const icon = step.querySelector('i');
+      icon.classList.remove('fa-circle-notch', 'fa-spin', 'text-accentRed');
+      icon.classList.add('fa-check-circle', 'text-successGreen');
+    }
+
+    function startGeneration() {
+      if (generateBtn.disabled) return;
+
+      loadingModal.classList.remove('hidden');
+      placeholderContent.classList.add('hidden');
+      generatedResult.classList.add('hidden');
+
+      let step = 0;
+      const timer = setInterval(() => {
+        completeStep(step);
+        step++;
+        if (step >= steps.length) {
+          clearInterval(timer);
+          setTimeout(() => {
+            const username = randomUsername();
+            const password = randomPassword();
+
+            genUsernameEl.textContent = username;
+            genPasswordEl.textContent = password;
+
+            loadingModal.classList.add('hidden');
+            generatedResult.classList.remove('hidden');
+
+            accounts.unshift({ username, password, type: 'Alt', date: new Date().toLocaleString() });
+            if (accounts.length > 5) accounts.pop();
+            localStorage.setItem('fakeAccounts', JSON.stringify(accounts));
+            renderRecent();
+
+            navigator.clipboard.writeText(`Username: ${username}\nPassword: ${password}`);
+
+            startCooldown();
+          }, 800);
+        }
+      }, 1400);
+    }
+
+    function renderRecent() {
+      recentAccountsEl.innerHTML = accounts.map(acc => `
+        <div class="p-4 flex justify-between items-center hover:bg-gray-800/50 transition-colors">
+          <div>
+            <p class="font-medium">${acc.username}</p>
+            <p class="text-sm text-textMuted">${acc.password.slice(0,4)}... • ${acc.type} • ${acc.date}</p>
+          </div>
+          <div class="flex gap-4 text-textMuted">
+            <i class="fa-solid fa-copy cursor-pointer hover:text-white"></i>
+            <i class="fa-solid fa-eye cursor-pointer hover:text-white"></i>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    generateBtn.addEventListener('click', startGeneration);
+    renderRecent();
+  </script>
+</body>
+</html>
